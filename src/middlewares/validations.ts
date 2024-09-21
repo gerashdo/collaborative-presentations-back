@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express"
 import { validationResult } from "express-validator"
 import User from "../models/user"
+import Presentation from "../models/presentation"
 
 
 export const isUserUnique = async (req: Request, res: Response, next: NextFunction) => {
@@ -35,6 +36,17 @@ export const checkValidations = (req: Request, res: Response, next: NextFunction
           errors: errors.mapped()
       })
   }
+  next()
+}
 
+export const presentationExists = async (req: Request, res: Response, next: NextFunction) => {
+  const {id} = req.params
+  const presentation = await Presentation.findById(id)
+  if (!presentation) {
+    return res.status(404).json({
+      ok: false,
+      errors: {id: {msg: 'Presentation not found'}}
+    })
+  }
   next()
 }

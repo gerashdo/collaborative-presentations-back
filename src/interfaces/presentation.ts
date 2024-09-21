@@ -16,9 +16,14 @@ export interface IUserRole {
 
 export interface IPresentation extends Document {
   title: string
-  description: string
   slides: Types.Array<ISlide['_id']>
   users: Types.Array<IUserRole>
   creator: IUser['_id']
   createdAt: Date
+}
+
+export enum AllowedPresentationOrderByFields {
+  title = 'title',
+  creator = 'creator',
+  createdAt = 'createdAt'
 }
