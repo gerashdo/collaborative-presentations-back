@@ -15,6 +15,18 @@ export const isUserUnique = async (req: Request, res: Response, next: NextFuncti
   next()
 }
 
+export const creatorUserExists = async (req: Request, res: Response, next: NextFunction) => {
+  const {creatorId} = req.body
+  const user = await User.findById(creatorId)
+  if (!user) {
+    return res.status(404).json({
+      ok: false,
+      errors: {creatorId: {msg: 'Creator user not found'}},
+    })
+  }
+  next()
+}
+
 export const checkValidations = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req)
   if( !errors.isEmpty() ){

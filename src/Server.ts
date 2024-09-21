@@ -1,9 +1,10 @@
 import express, { Express } from "express"
 import cors from "cors"
 import dbConnection from "./db/config"
-import { ApiPaths } from "./interfaces/utils"
 import userRouter from "./routes/users"
+import presentationRouter from "./routes/presentations"
 import { notFound } from "./controllers/404"
+import { ApiPaths } from "./interfaces/utils"
 
 
 export class Server {
@@ -18,6 +19,7 @@ export class Server {
     this.app = express()
     this.paths = {
       users: "/users",
+      presentations: "/presentations",
     }
     this.connectDB()
     this.middlwares()
@@ -38,6 +40,7 @@ export class Server {
 
   routes() {
     this.app.use(`${this.basePath}${this.paths.users}`, userRouter)
+    this.app.use(`${this.basePath}${this.paths.presentations}`, presentationRouter)
     this.app.get('*', notFound)
   }
 
