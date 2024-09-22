@@ -6,16 +6,10 @@ import { OrderDirection } from "../interfaces/utils"
 
 export const createPresentation = async (title: string, creatorId: string) => {
   const initialSlide = await createSlide('', [])
-  const role: UserRole = UserRole.CREATOR
   const presentation = new Presentation({
     title,
     slides: [initialSlide._id],
-    users: [
-      {
-        user: creatorId,
-        role,
-      }
-    ],
+    users: [],
     creator: creatorId,
   })
 
