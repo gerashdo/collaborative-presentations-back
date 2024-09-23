@@ -59,3 +59,68 @@ export const getPresentation = async (id: string) => {
 
   return presentation
 }
+
+export const updateUserRole = async (presentationId: string, userId: string, role: UserRole) => {
+  const updatedPresentation  = await Presentation.findOneAndUpdate(
+    {_id: presentationId, 'users.user': userId},
+    { $set: { 'users.$.role': role } },
+    { new: true }
+  ).populate({
+    path: 'slides',
+    options: { sort: { _id: 1 } }
+  })
+  .populate({
+    path: 'users',
+    populate: { path: 'user' }
+  })
+  .populate('creator')
+
+  if (!updatedPresentation) {
+    throw new Error('User not found in presentation')
+  }
+  return updatedPresentation
+}
+
+export const createNewSlideInPresentation = async (presentationId: string) => {
+  const slide = await createSlide('', [])
+  const presentation = await Presentation.findByIdAndUpdate(
+    presentationId,
+    { $push: { slides: slide._id } },
+    { new: true }
+  ).populate({
+    path: 'slides',
+    options: { sort: { _id: 1 } }
+  })
+  .populate({
+    path: 'users',
+    populate: { path: 'user' }
+  })
+  .populate('creator')
+
+  if (!presentation) {
+    throw new Error('Presentation not found')
+  }
+
+  return presentation
+}
+
+export const removeSlideFromPresentation = async (presentationId: string, slideId: string) => {
+  const presentation = await Presentation.findByIdAndUpdate(
+    presentationId,
+    { $pull: { slides: slideId } },
+    { new: true }
+  ).populate({
+    path: 'slides',
+    options: { sort: { _id: 1 } }
+  })
+  .populate({
+    path: 'users',
+    populate: { path: 'user' }
+  })
+  .populate('creator')
+
+  if (!presentation) {
+    throw new Error('Presentation not found')
+  }
+  return presentation
+}

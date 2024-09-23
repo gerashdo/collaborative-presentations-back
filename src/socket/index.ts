@@ -1,9 +1,10 @@
 import { Server as HTTPServer } from 'http'
 import { Server, Socket } from 'socket.io'
-import { getPresentation } from '../services/presentation'
+import { createNewSlideInPresentation, getPresentation, removeSlideFromPresentation, updateUserRole } from '../services/presentation'
 import { getUserById } from '../services/user'
-import { UserJoinPresentationPayload, UserLeavePresentationPayload, UserRole } from '../interfaces/presentation'
+import { CreateNewSlidePayload, UpdateUserRolePayload, UserJoinPresentationPayload, UserLeavePresentationPayload, UserRole } from '../interfaces/presentation'
 import { SOCKET_EVENTS } from '../interfaces/events'
+
 
 export const setupSocket = (server: HTTPServer) => {
 
@@ -83,11 +84,9 @@ export const setupSocket = (server: HTTPServer) => {
           console.log('User is not in the presentation:', user.id)
           return
         }
-
         presentation.users.pull(userRole)
         presentation = await presentation.save()
 
-        // Notify all users in the presentation about the user leaving
         io.to(presentationId).emit(SOCKET_EVENTS.USER_LEFT, {
           presentation: await presentation.populate({
             path: 'users',
@@ -102,6 +101,43 @@ export const setupSocket = (server: HTTPServer) => {
 
     socket.on(SOCKET_EVENTS.DISCONNECT, () => {
       console.log('User disconnected:', socket.id)
+    })
+
+    socket.on(SOCKET_EVENTS.UPDATE_USER_ROLE, async ({ presentationId, userId, role }: UpdateUserRolePayload) => {
+      console.log('Update user role:', presentationId, userId, role)
+      try {
+        const presentation = await updateUserRole(presentationId, userId, role)
+        io.to(presentationId).emit(SOCKET_EVENTS.USER_ROLE_UPDATED, {
+          presentation
+        })
+      } catch (error) {
+        console.error('Error assigning role:', error)
+        socket.emit('error', { message: 'Server error.' })
+      }
+    })
+
+    socket.on(SOCKET_EVENTS.ADD_SLIDE, async ({ presentationId }: CreateNewSlidePayload) => {
+      try {
+        const presentation = await createNewSlideInPresentation(presentationId)
+        io.to(presentationId).emit(SOCKET_EVENTS.SLIDE_ADDED, {
+          presentation,
+        })
+      } catch (error) {
+        console.error('Error adding slide:', error)
+        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Server error.' })
+      }
+    })
+
+    socket.on(SOCKET_EVENTS.REMOVE_SLIDE, async ({presentationId, slideId}) => {
+      try {
+        const presentation = await removeSlideFromPresentation(presentationId, slideId)
+        io.to(presentationId).emit(SOCKET_EVENTS.SLIDE_REMOVED, {
+          presentation
+        })
+      } catch (error) {
+          console.error('Error removing slide:', error)
+          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Server error.' })
+      }
     })
   })
 }

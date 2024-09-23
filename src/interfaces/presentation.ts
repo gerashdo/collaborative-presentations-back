@@ -37,3 +37,13 @@ export interface UserLeavePresentationPayload {
   presentationId: string
   userId: string
 }
+
+export interface UpdateUserRolePayload {
+  presentationId: string
+  userId: string
+  role: UserRole
+}
+
+export interface CreateNewSlidePayload {
+  presentationId: string
+}
