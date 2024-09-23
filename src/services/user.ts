@@ -9,3 +9,8 @@ export const getUser = async (nickname: string) => {
   const user = await User.findOne({nickname})
   return user
 }
+
+export const getUserById = async (id: string) => {
+  const user = await User.findById(id)
+  return user
+}

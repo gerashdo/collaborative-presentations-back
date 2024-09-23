@@ -10,7 +10,7 @@ export enum UserRole {
 }
 
 export interface IUserRole {
-  user: IUser['_id']
+  user: IUser
   role: UserRole
 }
 
@@ -18,7 +18,7 @@ export interface IPresentation extends Document {
   title: string
   slides: Types.Array<ISlide['_id']>
   users: Types.Array<IUserRole>
-  creator: IUser['_id']
+  creator: IUser
   createdAt: Date
 }
 
@@ -26,4 +26,14 @@ export enum AllowedPresentationOrderByFields {
   title = 'title',
   creator = 'creator',
   createdAt = 'createdAt'
+}
+
+export interface UserJoinPresentationPayload {
+  presentationId: string
+  userId: string
+}
+
+export interface UserLeavePresentationPayload {
+  presentationId: string
+  userId: string
 }
