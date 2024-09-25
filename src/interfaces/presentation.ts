@@ -16,7 +16,7 @@ export interface IUserRole {
 
 export interface IPresentation extends Document {
   title: string
-  slides: Types.Array<ISlide['_id']>
+  slides: Types.Array<ISlide>
   users: Types.Array<IUserRole>
   creator: IUser
   createdAt: Date
@@ -46,4 +46,9 @@ export interface UpdateUserRolePayload {
 
 export interface CreateNewSlidePayload {
   presentationId: string
+}
+
+export interface RemoveSlidePayload {
+  presentationId: string,
+  slideId: string,
 }

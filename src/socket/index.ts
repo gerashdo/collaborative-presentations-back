@@ -2,8 +2,12 @@ import { Server as HTTPServer } from 'http'
 import { Server, Socket } from 'socket.io'
 import { createNewSlideInPresentation, getPresentation, removeSlideFromPresentation, updateUserRole } from '../services/presentation'
 import { getUserById } from '../services/user'
-import { CreateNewSlidePayload, UpdateUserRolePayload, UserJoinPresentationPayload, UserLeavePresentationPayload, UserRole } from '../interfaces/presentation'
+import { addElementToSlide, removeElementFromSlide } from '../services/slide'
+import { updateSlideElement } from '../services/slideElement'
+import { CreateNewSlidePayload, RemoveSlidePayload, UpdateUserRolePayload, UserJoinPresentationPayload, UserLeavePresentationPayload, UserRole } from '../interfaces/presentation'
 import { SOCKET_EVENTS } from '../interfaces/events'
+import { AddElementToSlidePayload } from '../interfaces/slide'
+import { RemoveSlideElementPayload, UpdateSlideElementPayload } from '../interfaces/slideElement'
 
 
 export const setupSocket = (server: HTTPServer) => {
@@ -128,7 +132,7 @@ export const setupSocket = (server: HTTPServer) => {
       }
     })
 
-    socket.on(SOCKET_EVENTS.REMOVE_SLIDE, async ({presentationId, slideId}) => {
+    socket.on(SOCKET_EVENTS.REMOVE_SLIDE, async ({presentationId, slideId}: RemoveSlidePayload) => {
       try {
         const presentation = await removeSlideFromPresentation(presentationId, slideId)
         io.to(presentationId).emit(SOCKET_EVENTS.SLIDE_REMOVED, {
@@ -137,6 +141,46 @@ export const setupSocket = (server: HTTPServer) => {
       } catch (error) {
           console.error('Error removing slide:', error)
           socket.emit(SOCKET_EVENTS.ERROR, { message: 'Server error.' })
+      }
+    })
+
+    socket.on(SOCKET_EVENTS.ADD_ELEMENT_TO_SLIDE, async ({ presentationId, slideId, element }: AddElementToSlidePayload) => {
+      try {
+        console.log('Add element to slide:', presentationId, slideId, element)
+        const slide = await addElementToSlide(slideId, element)
+        io.to(presentationId).emit(SOCKET_EVENTS.SLIDE_UPDATED, {
+          slide,
+          presentationId,
+        })
+      } catch (error) {
+        console.error('Error adding element to slide:', error)
+        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Server error.' })
+      }
+    })
+
+    socket.on(SOCKET_EVENTS.REMOVE_ELEMENT_FROM_SLIDE, async ({presentationId, slideId, elementId}: RemoveSlideElementPayload) => {
+      try {
+        const slide = await removeElementFromSlide(slideId, elementId)
+        io.to(presentationId).emit(SOCKET_EVENTS.SLIDE_UPDATED, {
+          presentationId,
+          slide,
+        })
+      } catch (error) {
+        console.error('Error removing element from slide:', error)
+        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Server error.' })
+      }
+    })
+
+    socket.on(SOCKET_EVENTS.UPDATE_SLIDE_ELEMENT, async ({presentationId, slideId, elementId, element}: UpdateSlideElementPayload) => {
+      try {
+        const updatedElement = await updateSlideElement(elementId, element)
+        io.to(presentationId).emit(SOCKET_EVENTS.SLIDE_ELEMENT_UPDATED, {
+          slideId,
+          element: updatedElement,
+        })
+      } catch (error) {
+        console.error('Error updating slide element:', error)
+        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Server error.' })
       }
     })
   })

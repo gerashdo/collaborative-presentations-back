@@ -9,6 +9,11 @@ export enum SOCKET_EVENTS {
   SLIDE_ADDED = 'slide_added',
   REMOVE_SLIDE = 'remove_slide',
   SLIDE_REMOVED = 'slide_removed',
+  ADD_ELEMENT_TO_SLIDE = 'add_element_to_slide',
+  REMOVE_ELEMENT_FROM_SLIDE = 'remove_element_from_slide',
+  SLIDE_UPDATED = 'slide_updated',
+  UPDATE_SLIDE_ELEMENT = 'update_slide_element',
+  SLIDE_ELEMENT_UPDATED = 'slide_element_updated',
   DISCONNECT = 'disconnect',
   ERROR = 'error',
 }

@@ -1,5 +1,5 @@
 import Presentation from "../models/presentation"
-import { createSlide } from "./slide"
+import { createSlide, removeSlide } from "./slide"
 import { AllowedPresentationOrderByFields, UserRole } from "../interfaces/presentation"
 import { OrderDirection } from "../interfaces/utils"
 
@@ -49,7 +49,8 @@ export const getPresentation = async (id: string) => {
   const presentation = await Presentation.findById(id)
     .populate({
       path: 'slides',
-      options: { sort: { _id: 1 } }
+      options: { sort: { _id: 1 } },
+      populate: { path: 'elements' },
     })
     .populate({
       path: 'users',
@@ -122,5 +123,6 @@ export const removeSlideFromPresentation = async (presentationId: string, slideI
   if (!presentation) {
     throw new Error('Presentation not found')
   }
+  await removeSlide(slideId)
   return presentation
 }
