@@ -1,6 +1,7 @@
 import Slide from "../models/slide"
-import { ISlideElement } from "../interfaces/slide"
+import SlideElement from "../models/SlideElement"
 import { createNewSlideElement, removeSlideElement } from "./slideElement"
+import { ISlideElement } from "../interfaces/slide"
 
 
 export const createSlide = async (content: string, elements: string[]) => {
@@ -17,6 +18,7 @@ export const removeSlide = async (slideId: string) => {
   if (!slide) {
     throw new Error('Slide not found')
   }
+  await SlideElement.deleteMany({ _id: { $in: slide.elements } })
   return slide
 }
 

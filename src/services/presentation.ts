@@ -90,7 +90,8 @@ export const createNewSlideInPresentation = async (presentationId: string) => {
     { new: true }
   ).populate({
     path: 'slides',
-    options: { sort: { _id: 1 } }
+    options: { sort: { _id: 1 } },
+    populate: { path: 'elements' },
   })
   .populate({
     path: 'users',
@@ -112,7 +113,8 @@ export const removeSlideFromPresentation = async (presentationId: string, slideI
     { new: true }
   ).populate({
     path: 'slides',
-    options: { sort: { _id: 1 } }
+    options: { sort: { _id: 1 } },
+    populate: { path: 'elements' },
   })
   .populate({
     path: 'users',

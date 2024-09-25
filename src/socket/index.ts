@@ -172,6 +172,7 @@ export const setupSocket = (server: HTTPServer) => {
     })
 
     socket.on(SOCKET_EVENTS.UPDATE_SLIDE_ELEMENT, async ({presentationId, slideId, elementId, element}: UpdateSlideElementPayload) => {
+      console.log('Update slide element:', presentationId, slideId, elementId, element)
       try {
         const updatedElement = await updateSlideElement(elementId, element)
         io.to(presentationId).emit(SOCKET_EVENTS.SLIDE_ELEMENT_UPDATED, {
