@@ -1,7 +1,9 @@
 import Presentation from "../models/presentation"
 import { createSlide, removeSlide } from "./slide"
+import { getUserById } from "./user"
 import { AllowedPresentationOrderByFields, UserRole } from "../interfaces/presentation"
 import { OrderDirection } from "../interfaces/utils"
+import { isUserEditor } from "../helpers/presentationChecks"
 
 
 export const createPresentation = async (title: string, creatorId: string) => {
@@ -59,6 +61,52 @@ export const getPresentation = async (id: string) => {
     .populate('creator')
 
   return presentation
+}
+
+export const addUserToPresentation = async (presentationId: string, userId: string) => {
+  const user = await getUserById(userId)
+  if (!user) throw new Error('User not found')
+
+  let presentation = await getPresentation(presentationId)
+  if (!presentation)  throw new Error('Presentation not found')
+
+  const userInPresentation = presentation.users.find((u) => u.user.id === userId)
+
+  if (userInPresentation) {
+    if (userInPresentation.isConnected) throw new Error('User alredy in presentation')
+    userInPresentation.isConnected = true
+  } else {
+    presentation.users.push({
+      user: userId,
+      role: user.id === presentation.creator.id ? UserRole.EDITOR : UserRole.VIEWER,
+    })
+  }
+
+  presentation = await presentation.save()
+  return await presentation.populate({
+    path: 'users',
+    populate: { path: 'user' }
+  })
+}
+
+export const removeUserFromPresentation = async (presentationId: string, userId: string) => {
+  let presentation = await getPresentation(presentationId)
+  if (!presentation) throw new Error('Presentation not found')
+
+  const userInPresentation = presentation.users.find((u) => u.user.id === userId)
+  if (!userInPresentation) throw new Error('User not found in presentation')
+
+  if (isUserEditor(userInPresentation)) {
+    userInPresentation.isConnected = false
+  } else {
+    presentation.users.pull(userInPresentation)
+  }
+
+  presentation = await presentation.save()
+  return await presentation.populate({
+    path: 'users',
+    populate: { path: 'user' }
+  })
 }
 
 export const updateUserRole = async (presentationId: string, userId: string, role: UserRole) => {

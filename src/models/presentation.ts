@@ -9,6 +9,7 @@ const presentationSchema = new Schema<IPresentation>(
     users: [{
       user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
       role: { type: String, enum: Object.values(UserRole), required: true },
+      isConnected: { type: Boolean, default: true },
     }],
     creator: {type: Schema.Types.ObjectId, ref: 'User', required: true},
   },

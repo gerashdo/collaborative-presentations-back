@@ -12,6 +12,7 @@ export enum UserRole {
 export interface IUserRole {
   user: IUser
   role: UserRole
+  isConnected?: boolean
 }
 
 export interface IPresentation extends Document {
